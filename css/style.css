@@ -30,13 +30,15 @@ body, input {
 
 .age-label {
   color: #B0B5B9;
+  /* color: #515151; */
   font-size: 1.2rem;
   line-height: 1;
   margin: 0 0 0 2px;
 }
 
 .count {
-  color: #494949;
+  /* color: #494949; */
+  color: #202020;
   margin: 0;
   font-size: 6rem;
   line-height: 1;
@@ -88,7 +90,8 @@ footer {
 
 @media (prefers-color-scheme: dark) {
   body {
-    background: #494949;
+    /* background: #494949; */
+    background: #202020;
   }
 
   .count {
