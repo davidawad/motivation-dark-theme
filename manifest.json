@@ -1,20 +1,22 @@
 {
    "background": {
-      "persistent": false,
-      "scripts": [ "motivation.js" ]
+      "service_worker": "motivation.js"
    },
    "chrome_url_overrides": {
       "newtab": "dashboard.html"
    },
-   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+   "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self'"
+   },
+
    "description": "Replace new tab page with Motivation",
    "icons": {
       "128": "icon-128.png",
       "16": "icon-16.png",
       "48": "icon-48.png"
    },
-   "manifest_version": 2,
+   "manifest_version": 3,
    "name": "Motivation (fork) by David Awad",
    "offline_enabled": true,
-   "version": "0.6"
+   "version": "0.7"
 }

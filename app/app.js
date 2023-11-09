@@ -1,84 +1,108 @@
-(function(){
+(function() {
 
-var $  = document.getElementById.bind(document);
-var $$ = document.querySelectorAll.bind(document);
+  var $  = document.getElementById.bind(document);
+  var $$ = document.querySelectorAll.bind(document);
 
-var App = function($el){
-  this.$el = $el;
-  this.load();
+  var App = function($el){
+    this.$el = $el;
+    this.load();
 
-  this.$el.addEventListener(
-    'submit', this.submit.bind(this)
-  );
+    this.$el.addEventListener(
+      'submit', this.submit.bind(this)
+    );
 
-  if (this.dob) {
-    this.renderAgeLoop();
-  } else {
-    this.renderChoose();
-  }
-};
+    if (this.dob) {
+      this.renderAgeLoop();
+    } else {
+      this.renderChoose();
+    }
+  };
 
-App.fn = App.prototype;
+  App.fn = App.prototype;
 
-App.fn.load = function(){
-  var value;
+  App.fn.load = function(){
+    var value;
 
-  if (value = localStorage.dob)
-    this.dob = new Date(parseInt(value));
-};
+    if (value = localStorage.getItem('dob'))
+      this.dob = new Date(parseInt(value, 10));
 
-App.fn.save = function(){
-  if (this.dob)
-    localStorage.dob = this.dob.getTime();
-};
+    // Load the background color from localStorage and apply it
+    var bgColor = localStorage.getItem('bgcolor');
+    if (bgColor) {
+      this.applyBgColor(bgColor);
+    }
+  };
 
-App.fn.submit = function(e){
-  e.preventDefault();
+  App.fn.save = function(){
+    if (this.dob)
+      localStorage.setItem('dob', this.dob.getTime());
 
-  var input = this.$$('input')[0];
-  if ( !input.valueAsDate ) return;
+    // Save the background color when the form is submitted
+    var colorInput = $('bgcolor');
+    if (colorInput && colorInput.value) {
+      localStorage.setItem('bgcolor', colorInput.value);
+      this.applyBgColor(colorInput.value);
+    }
+  };
 
-  this.dob = input.valueAsDate;
-  this.save();
-  this.renderAgeLoop();
-};
+  App.fn.submit = function(e){
+    e.preventDefault();
 
-App.fn.renderChoose = function(){
-  this.html(this.view('dob')());
-};
+    var DateOfBirthInput = $('dob');
 
-App.fn.renderAgeLoop = function(){
-  this.interval = setInterval(this.renderAge.bind(this), 100);
-};
+    if (DateOfBirthInput && DateOfBirthInput.valueAsDate) {
+      this.dob = DateOfBirthInput.valueAsDate;
+      this.save();
+      this.renderAgeLoop();
+    }
+  };
 
-App.fn.renderAge = function(){
-  var now       = new Date
-  var duration  = now - this.dob;
-  var years     = duration / 31556900000;
+  // Function to apply the background color
+  App.fn.applyBgColor = function(color) {
+    document.body.style.backgroundColor = color;
+  };
 
-  var majorMinor = years.toFixed(9).toString().split('.');
+  App.fn.renderChoose = function(){
+    this.html(this.view('dob'));
+  };
 
-  requestAnimationFrame(function(){
-    this.html(this.view('age')({
-      year:         majorMinor[0],
-      milliseconds: majorMinor[1]
-    }));
-  }.bind(this));
-};
+  App.fn.renderAgeLoop = function(){
+    if(this.interval) clearInterval(this.interval);
+    this.interval = setInterval(this.renderAge.bind(this), 100);
+  };
 
-App.fn.$$ = function(sel){
-  return this.$el.querySelectorAll(sel);
-};
+  App.fn.renderAge = function(){
+    var now = new Date();
+    var duration = now - this.dob;
+    var years = duration / 31556900000;
 
-App.fn.html = function(html){
-  this.$el.innerHTML = html;
-};
+    var majorMinor = years.toFixed(9).split('.');
 
-App.fn.view = function(name){
-  var $el = $(name + '-template');
-  return Handlebars.compile($el.innerHTML);
-};
+    requestAnimationFrame(function(){
+      this.html(this.view('age', {
+        year: majorMinor[0],
+        milliseconds: majorMinor[1]
+      }));
+    }.bind(this));
+  };
 
-window.app = new App($('app'))
+  App.fn.$$ = function(sel){
+    return this.$el.querySelectorAll(sel);
+  };
+
+  App.fn.html = function(html){
+    this.$el.innerHTML = html;
+  };
+
+  App.fn.view = function(name, data){
+    var $el = $(name + '-template');
+    var template = $el.innerHTML;
+
+    return template.replace(/\{\{(\w+)\}\}/g, function(match, key) {
+      return data && data.hasOwnProperty(key) ? data[key] : '';
+    });
+  };
+
+  window.app = new App($('app'));
 
 })();
